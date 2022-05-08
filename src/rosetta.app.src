@@ -5,7 +5,8 @@
   {mod, {rosetta_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    bbmustache
    ]},
   {env,[]},
   {modules, []},
