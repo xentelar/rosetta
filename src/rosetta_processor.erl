@@ -15,7 +15,7 @@ process() ->
     Worflow = #workflow{process_name = <<"test">>, nodes = #{}, transitions = #{}},
     FileName = <<"/Users/bismark/Work/xentelar/smart-next/src/rsi/docs/change-panel-state.puml">>,
     FileContent = read_lines(FileName),
-    ?LOG_INFO("\nFile Name --> ~p", [FileName]),
+    ?LOG_INFO("File Name --> ~p", [FileName]),
     process_line(FileContent, Worflow).
 
 read_lines(FileName) ->
@@ -25,8 +25,8 @@ read_lines(FileName) ->
 process_line([], Worflow) ->
     ?LOG_INFO("WORKFLOW RESULT --> ~p", [Worflow]);
 process_line([Head | Tail], Worflow) ->
-    Line = string:trim(Head, leading), %Line = re:replace(Head, "^\\s+", "", [global, {return, binary}]),
-    R0 = string:find(Line, <<"state \"">>, leading), %R = binary:matches(Line, [<<"state">>,<<" as ">>]),
+    Line = string:trim(Head, leading),
+    R0 = string:find(Line, <<"state \"">>, leading),
     R1 = string:find(Line, <<" --> ">>, leading),
     Worflow0 = process_state(Line, R0, Worflow),
     Worflow1 = process_node(Line, R1, Worflow0),
@@ -34,8 +34,7 @@ process_line([Head | Tail], Worflow) ->
 
 process_state(_, nomatch, Worflow) -> 
     Worflow;
-process_state(Line, R, Worflow) -> 
-%    ?LOG_INFO("WORKFLOW --> ~p", [Worflow]),
+process_state(Line, _R, Worflow) -> 
     #workflow{nodes = Nodes} = Worflow,
     %?LOG_INFO("LINE IN --> ~p", [Line]),
 
@@ -44,7 +43,6 @@ process_state(Line, R, Worflow) ->
     %?LOG_INFO("LINE OUT --> ~p", [Line6]),
 
     {State0, VertPack, VertClass, State1} = decode(Line6),
-    %?LOG_INFO("Status Line --> ~p -- ~p -- ~p -- ~p", [State0, VertPack, VertClass, State1]),
 
     Node = maps:find(State0, Nodes),
     NewNode = create_node(State0, VertPack, VertClass, State1, Node),
@@ -93,12 +91,8 @@ create_transitions(<<"[*]">>, NextState, Event, Node, StateTrants, Transitions) 
     create_transitions(<<"start">>, NextState, Event, Node, StateTrants, Transitions);
 
 create_transitions(State, <<"[*]">>, Event, Node, StateTrants, Transitions) -> 
-        create_transitions(State, <<"end">>, Event, Node, StateTrants, Transitions);
+    create_transitions(State, <<"end">>, Event, Node, StateTrants, Transitions);
         
-% create_transitions(State, _NextState, _Event, error, _, _) -> 
-%     ?LOG_ERROR("ERROR state does not defineded--> ~p", [State]),
-%     throw(<<"ERROR state do not defineded">>);
-
 create_transitions(State, NextState, Event, _Node, error, Transitions) -> 
     T = [#transition{state = State, event = Event, next_state = NextState}],
     maps:put(State, T, Transitions);
