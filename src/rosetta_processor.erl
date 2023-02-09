@@ -12,6 +12,10 @@
 
 -export([process/1]).
 
+%%%-------------------------------------------------------------------
+%% @doc read and process the puml file and get sate machime model
+%% @end
+%%%-------------------------------------------------------------------
 process(FileName) ->
 
    Start = #state{state = <<"start">>, 
@@ -35,17 +39,42 @@ process(FileName) ->
       end,
    lists:foldl(F, InitialWorkflow, FileContent).
 
+%%%-------------------------------------------------------------------
+%% @doc load all file content
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 read_lines(FileName) ->
    {ok, Data} = file:read_file(FileName),
    Data0 = rosetta_utils:replace(Data, [<<" \\\\\\n">>], ?NOTHING),
    binary:split(Data0, [<<"\n">>], [global]).
 
+%%%-------------------------------------------------------------------
+%% @doc looking for state keyword in fsm model
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 state(Line) -> string:find(Line, <<"state \"">>, leading).
 
+%%%-------------------------------------------------------------------
+%% @doc looking for transitions states in fsm model
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 transition(Line) -> re:run(Line, <<"-([^-]*)->">>).
 
+%%%-------------------------------------------------------------------
+%% @doc looking for note keyword in fsm model
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 note(Line) -> string:find(Line, <<"note \"">>, leading).
 
+%%%-------------------------------------------------------------------
+%% @doc 
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 process_state(_, nomatch, Workflow) ->
    Workflow;
 process_state(Line, _R, Workflow) ->
@@ -70,6 +99,11 @@ process_state(Line, _R, Workflow) ->
    States0 = maps:put(State0, NewState, States),
    Workflow#workflow{states = States0}.
 
+%%%-------------------------------------------------------------------
+%% @doc 
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 process_transition(_, nomatch, Workflow) ->
    Workflow;
 process_transition(Line, _R, Workflow) ->
@@ -96,6 +130,11 @@ process_transition(Line, _R, Workflow) ->
    Workflow#workflow{states = States0, 
                      events = Events0}.
 
+%%%-------------------------------------------------------------------
+%% @doc 
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 process_note(_, nomatch, Workflow) ->
    Workflow;
 process_note(Line, _R, Workflow) ->
@@ -109,12 +148,27 @@ process_note(Line, _R, Workflow) ->
                      space = FsmSpace,
                      module = FsmModule}.
 
+%%%-------------------------------------------------------------------
+%% @doc 
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 n_start(<<"[*]">>) -> <<"start">>;
 n_start(V) -> V.
 
+%%%-------------------------------------------------------------------
+%% @doc 
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 n_end(<<"[*]">>) -> <<"end">>;
 n_end(V) -> V.
 
+%%%-------------------------------------------------------------------
+%% @doc 
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 create_transitions(StateId, _NextStateId, _Event, error) ->
    ?LOG_ERROR("ERROR node does not contain state:  --> ~p", [StateId]),
          throw(<<"ERROR node does not contail state">>);

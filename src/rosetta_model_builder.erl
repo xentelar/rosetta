@@ -1,6 +1,6 @@
 
 %%%-------------------------------------------------------------------
-%% @doc rosetta public API
+%% @doc Model builder
 %% @end
 %%%-------------------------------------------------------------------
 
@@ -12,6 +12,10 @@
 
 -export([build/3]).
 
+%%%-------------------------------------------------------------------
+%% @doc build the model
+%% @end
+%%%-------------------------------------------------------------------
 build(SourcePath, OutPath, Workflow) ->
    TemplateName = Workflow#workflow.template,
 
@@ -72,6 +76,11 @@ build(SourcePath, OutPath, Workflow) ->
    {ok, File} = file:open(OutFile, [write]),
    io:format(File, "~s~n", [Result]).
 
+%%%-------------------------------------------------------------------
+%% @doc load mustache template
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 get_template(Filename) ->
    case file:read_file(Filename) of
       {ok, Body} ->
@@ -80,12 +89,27 @@ get_template(Filename) ->
          throw(Reason)
    end.
 
+%%%-------------------------------------------------------------------
+%% @doc identifier of end
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 is_end(<<"end">>) -> true;
 is_end(_V) -> false.
 
+%%%-------------------------------------------------------------------
+%% @doc identifier of start
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 is_start(<<"start">>) -> true;
 is_start(_V) -> false.
 
+%%%-------------------------------------------------------------------
+%% @doc make folders
+%% @end
+%% @private
+%%%-------------------------------------------------------------------
 mk_dir(Path) ->
    case filelib:is_dir(Path) of
       false ->
