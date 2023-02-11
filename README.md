@@ -1,9 +1,13 @@
 rosetta
 =====
 
-An OTP application
 
 Build
 -----
 
-    $ rebar3 compile
+    $ rebar3 escriptize
+
+Run
+---
+
+    $ _build/default/bin/rosetta
